@@ -291,10 +291,15 @@ $ xhost -local:docker
 
 ### Starting the Simulation: 
 
-To start the simuation run: 
+To start the simuation run (in versions earlier than ``` Docker 19.03```): 
 
 ```
 $ docker container run --runtime=nvidia -it -e DISPLAY  --rm --net=host --env="QT_X11_NO_MITSHM=1" -v /tmp/.X11-unix:/tmp/.X11-unix simulator
+```
+For newer versions, substitute ```--runtime=nvidia``` for ``` --gpus all```
+
+```
+$ docker container run --gpus all -it -e DISPLAY  --rm --net=host --env="QT_X11_NO_MITSHM=1" -v /tmp/.X11-unix:/tmp/.X11-unix simulator
 ```
 
 Once gazebo and rviz have completed their startup, in a seperate terminal run: 
