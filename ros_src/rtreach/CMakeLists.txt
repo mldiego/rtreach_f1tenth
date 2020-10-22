@@ -214,6 +214,7 @@ add_message_files(
   FILES
   velocity_msg.msg
   angle_msg.msg
+  stamped_ttc.msg
 )
 
 generate_messages(
@@ -237,8 +238,15 @@ include_directories(
 FIND_LIBRARY(CUSTOMLIB Rtreach src/)
 FIND_LIBRARY(CUSTOMLIB2 Rtreachvis src/)
 
+
 add_executable(reach_node src/reach_node_sync.cpp)
 target_link_libraries(reach_node ${catkin_LIBRARIES} ${CUSTOMLIB})
+add_dependencies(reach_node rtreach_generate_messages_cpp)
 
 add_executable(visualize_node src/visualize_reachset.cpp)
+add_dependencies(visualize_node rtreach_generate_messages_cpp)
 target_link_libraries(visualize_node ${catkin_LIBRARIES} ${CUSTOMLIB2})
+
+add_executable(benchmark_node src/benchmarking_node.cpp)
+target_link_libraries(benchmark_node ${catkin_LIBRARIES} ${CUSTOMLIB})
+add_dependencies(benchmark_node rtreach_generate_messages_cpp)

@@ -95,6 +95,7 @@ Now that you have a taste of what rtreach is, we can move on to the more fun par
 First compile the code, credit: [mix-c-and-cpp](https://www.thegeekstuff.com/2013/01/mix-c-and-cpp/):
 
 ```
+$ cd src
 $ gcc -c -std=gnu99 -O3 -Wall  -fpic face_lift_bicycle_model.c geometry.c interval.c simulate_bicycle.c util.c  dynamics_bicycle_model.c bicycle_safety.c bicycle_model.c face_lift_bicycle_model_visualization.c bicycle_model_vis.c  -lm
 ```
 
@@ -148,7 +149,7 @@ $ cp -r ros_src/rtreach/ ../rtreach_ros/src/
 ```
 
 ```
-$ cp run_batch.sh ../rtreach_ros
+$ cp run_batch.sh run_batch_rl.sh ../rtreach_ros
 ```
 Copy the rtreach shared library into the package:
 
@@ -226,14 +227,20 @@ $ rosrun rtreach visualize_node (file containing obstacle locations) (boolean fo
 ![REACH_HULL](images/reach_hull.gif)
 
 
-## Run a Series of Experiments
+## Run Benchmarking Series of Experiments
 
-One of the things that may be useful to do is to run a series of simulations with a diverse number of obstacle placements for a given track. Then one can monitor how effective the safety controller under consideration is. We have made this functionality available. The bash script [run_batch.sh](run_batch.sh) performs several experiments with a timeout of 30 seconds and  randomly places obstacles within the racetrack.
+One of the things that may be useful to do is to run a series of simulations with a diverse number of obstacle placements for a given track. Then one can monitor how effective the safety controller under consideration is. We have made this functionality available. The bash script [run_batch.sh](run_batch.sh) performs several experiments with a timeout of 60 seconds and randomly places obstacles within the racetrack.
 
 To use the script first source both the rtreach and Platooning-F1Tenth packages and then run the bash file:
 
+#### End-to-End Benchmarking 
 ```
 ./run_batch
+```
+
+#### RL Benchmarking
+```
+./run_batch_rl.sh
 ```
 
 If a collision occurs during any of the experiments it will be logged along with the random_seed, and number of obstacles so that the scenario can be re-produced. The logs can be found in the following [directory](https://github.com/pmusau17/Platooning-F1Tenth/blob/master/src/race/logs).

@@ -255,7 +255,7 @@ HyperRectangle face_lifting_iterative_improvement_bicycle_vis(int startMs, Lifti
 
 	// set the start time
 	struct timeval start;
-	int elapsedTotal;
+	int elapsedTotal =0;
 	gettimeofday(&start, NULL);
 	set_error_print_params(settings);
     HyperRectangle total_hull;
@@ -297,7 +297,7 @@ HyperRectangle face_lifting_iterative_improvement_bicycle_vis(int startMs, Lifti
 		HyperRectangle total_hull = trackedRect;
 
 		// compute reachability up to split time
-		while (safe && timeRemaining > 0)
+		while (timeRemaining > 0)
 		{
 			// reachedAtIntermediateTime is a function that checks the current hyper-rectangle against the safety specification,
 			// whatever that might be
