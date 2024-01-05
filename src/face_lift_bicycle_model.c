@@ -21,11 +21,13 @@ bool face_lifting_iterative_improvement_bicycle(int startMs, LiftingSettings* se
 REAL get_derivative_bounds_bicycle(HyperRectangle* rect, int faceIndex,REAL heading_input, REAL throttle);
 
 
-
 // Constants necessary to guarantee loop termination.
 // These bound the values of the derivatives
 const REAL MAX_DER_B = 99999;
 const REAL MIN_DER_B = -99999;
+
+// for benchmarking purposes having the iterations at quit is huge
+int iterations_at_quit = 0;
 
 // make a face's neighborhood of a given width
 // At each dimension, there are two faces corresponding to that dimension, minimum_face and maximum_face
@@ -256,6 +258,9 @@ bool face_lifting_iterative_improvement_bicycle(int startMs, LiftingSettings* se
 	REAL stepSize = settings->initialStepSize;
 
 	int iter = 0; // number of iterations
+	int previous_iter =1;
+	int elapsed_prev = 0;
+	int next_iter_estimate = 0;
 
 	while (true)
 	{
@@ -330,20 +335,35 @@ bool face_lifting_iterative_improvement_bicycle(int startMs, LiftingSettings* se
 		  // it continues until the simulation time is over, or we encounter an unsafe state,
 		  // whichever occurs first. 
 
+
+		// Don't do another iteration unless you want to miss the deadline
 		int now = milliseconds2(&start);
 		elapsedTotal = now;
-
+		previous_iter = elapsedTotal - elapsed_prev;
+		// its O(2^N) in terms of box checking so have to scale the next iteration by 2 and add 1ms (for over-approximating how long it takes to compute the reachset)
+		if(previous_iter==0)
+			next_iter_estimate = 2;
+		else
+		{
+			if((previous_iter * 2+1)<next_iter_estimate)
+				next_iter_estimate = next_iter_estimate * 2;
+			else
+				next_iter_estimate  = previous_iter * 2+1;
+		}
 		
-
+		elapsed_prev = elapsedTotal;
+		//DEBUG_PRINT("elaspedTotal :%d, previous_iter: %d, projected_next_iter: %d\n\r", elapsedTotal,previous_iter,next_iter_estimate);
 		if (settings->maxRuntimeMilliseconds > 0)
 		{
 			int remaining = settings->maxRuntimeMilliseconds - elapsedTotal;
 
-			if (remaining < 0)
+			if(remaining<0)
+				DEBUG_PRINT("remaining: %d\r\n",remaining);
+			if (remaining <= next_iter_estimate)
 			{
 				// we've exceeded our time, use the result from the last iteration
 				// note in a real system you would have an interrupt or something to cut off computation
-				// DEBUG_PRINT("Quitting from runtime maxed out\n\r");
+				//DEBUG_PRINT("Quitting from runtime maxed out\n\r");
 				rv = lastIterationSafe;
 				//println(&trackedRect);
 				break;
@@ -365,8 +385,10 @@ bool face_lifting_iterative_improvement_bicycle(int startMs, LiftingSettings* se
 		// apply error-reducing strategy
 		stepSize /= 2;
 	}
+
+	iterations_at_quit = iter;
 	// DEBUG_PRINT("%dms: stepSize = %f\n",	elapsedTotal, stepSize);
-	DEBUG_PRINT("iterations at quit: %d\n\r", iter);
+	// DEBUG_PRINT("iterations at quit: %d\n\r", iter);
 
 	return rv;
 }
